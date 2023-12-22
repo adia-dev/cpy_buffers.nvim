@@ -20,7 +20,7 @@ To install
 `cpy_buffers`, you need to have Telescope installed. Then, add the following line to your Neovim configuration:
 
 ```
-Plug 'user/cpy_buffers'
+Plug 'adia-dev/cpy_buffers'
 ```
 
 Replace `'user/cpy_buffers'` with the path to this extension.
