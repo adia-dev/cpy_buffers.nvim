@@ -4,6 +4,8 @@
 
 ## Demo
 
+https://github.com/adia-dev/cpy_buffers.nvim/assets/63371699/2ca0ef2d-819b-48c5-aae0-d7d0f102ad42
+
 ## Features
 
 - **File Picker**: Seamlessly list and select multiple files within your Neovim environment.
@@ -13,7 +15,9 @@
 
 ## Installation
 
-To install `cpy_buffers`, you need to have Telescope installed. Then, add the following line to your Neovim configuration:
+To install 
+
+`cpy_buffers`, you need to have Telescope installed. Then, add the following line to your Neovim configuration:
 
 ```
 Plug 'user/cpy_buffers'
