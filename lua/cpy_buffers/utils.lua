@@ -1,5 +1,6 @@
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
+local config = require("cpy_buffers.config")
 
 local M = {}
 
@@ -24,8 +25,9 @@ function M.attach_mappings(prompt_bufnr, map)
         M.copy_contents_of_selected_files()
         actions.close(prompt_bufnr)
     end)
-    map("i", "<space>", M.toggle_selection(prompt_bufnr))
-    map("n", "<space>", M.toggle_selection(prompt_bufnr))
+    local cfg = config.get_config()
+    map("i", cfg.keymaps.toggle_selection, M.toggle_selection(prompt_bufnr))
+    map("n", cfg.keymaps.toggle_selection, M.toggle_selection(prompt_bufnr))
     return true
 end
 
