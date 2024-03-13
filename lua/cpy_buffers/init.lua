@@ -1,10 +1,14 @@
-local picker = require("cpy_buffers.picker")
+local config = require("cpy_buffers.config")
+local keymaps = require("cpy_buffers.keymaps")
+local commands = require("cpy_buffers.commands")
 
 local M = {}
 
 function M.setup(opts)
 	opts = opts or {}
-	vim.keymap.set("n", "<leader>h", picker.open_file_picker)
+	config.setup(opts)
+	keymaps.setup()
+    commands.register_commands()
 end
 
 return M
