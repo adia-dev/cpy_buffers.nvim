@@ -8,8 +8,10 @@ M.selected_entries = {}
 
 function M.copy_contents_of_selected_files()
     local contents = {}
+    local paths = {}
     for path, selected in pairs(M.selected_entries) do
         if selected then
+            table.insert(paths, path)
             local file_content, err = vim.fn.readfile(path)
             if err then
                 print("Error reading file: " .. path .. "\n" .. err)
@@ -21,8 +23,22 @@ function M.copy_contents_of_selected_files()
         ::continue::
     end
 
+
     local all_contents = table.concat(contents, "\n\n")
     vim.fn.setreg("+", all_contents)
+
+    if vim.tbl_isempty(contents) then
+        vim.api.nvim_echo({ { "No files were copied", "WarningMsg" } }, true, {})
+        return
+    else
+        -- message to print the paths of the copied files in a bullet list
+        local message = "Copied the contents of the following files:\n"
+        for _, path in ipairs(paths) do
+            message = message .. "  - " .. path .. "\n"
+        end
+        vim.api.nvim_echo({ { message, "Normal" } }, true, {})
+    end
+
 
     M.selected_entries = {}
 end
@@ -68,56 +84,121 @@ function M.toggle_all_files(prompt_bufnr)
     end
 end
 
+function M.activate_all_visible_entries(prompt_bufnr)
+    M.change_visible_entry_state(prompt_bufnr, true)
+end
+
+function M.deactivate_all_visible_entries(prompt_bufnr)
+    M.change_visible_entry_state(prompt_bufnr, false)
+end
+
+function M.change_visible_entry_state(prompt_bufnr, state)
+    local prompt_bufnr = vim.api.nvim_get_current_buf()
+    local current_picker = action_state.get_current_picker(prompt_bufnr)
+    local i = 1
+
+    for entry in current_picker.manager:iter() do
+        if M.selected_entries[entry.value] ~= state then
+            current_picker._multi:toggle(entry)
+            local row = current_picker:get_row(i)
+            if row > 0 and current_picker:can_select_row(row) then
+                current_picker.highlighter:hi_multiselect(row, current_picker._multi:is_selected(entry))
+            end
+        end
+
+        i = i + 1
+
+        M.selected_entries[entry.value] = state
+
+        if i > current_picker.max_results then
+            break
+        end
+    end
+end
+
 function M.invert_selection(prompt_bufnr)
     local current_picker = action_state.get_current_picker(prompt_bufnr)
-    local entries = current_picker.finder.results
-    if not entries or vim.tbl_isempty(entries) then
-        print("No files to invert selection")
-        return
-    end
+    local i = 1
 
-    -- First select all entries
-    actions.select_all(prompt_bufnr)
+    for entry in current_picker.manager:iter() do
+        current_picker._multi:toggle(entry)
+        local row = current_picker:get_row(i)
+        if row > 0 and current_picker:can_select_row(row) then
+            current_picker.highlighter:hi_multiselect(row, current_picker._multi:is_selected(entry))
+        end
 
-    -- Then toggle each entry, effectively inverting the selection
-    for _, entry in ipairs(entries) do
-        M.selected_entries[entry.value] = not M.selected_entries[entry.value]
-        actions.toggle_selection(prompt_bufnr)
+        i = i + 1
+
+        if M.selected_entries[entry.value] == nil then
+            M.selected_entries[entry.value] = true
+        else
+            M.selected_entries[entry.value] = not M.selected_entries[entry.value]
+        end
+
+        if i > current_picker.max_results then
+            break
+        end
     end
 end
 
 function M.attach_mappings(prompt_bufnr, map)
+    M.selected_entries = {}
+
     actions.select_default:replace(function()
         M.copy_contents_of_selected_files()
         actions.close(prompt_bufnr)
-        M.selected_entries = {}
     end)
 
     local cfg = config.get_config()
+    local mappings = {
+        {
+            modes = { "i", "n" },
+            key = cfg.keymaps.toggle_all,
+            action = function()
+                M.toggle_all_files(
+                    prompt_bufnr)
+            end
+        },
+        {
+            modes = { "i", "n" },
+            key = cfg.keymaps.invert_selection,
+            action = function()
+                M.invert_selection(
+                    prompt_bufnr)
+            end
+        },
+        {
+            modes = { "i", "n" },
+            key = cfg.keymaps.activate_all_visible,
+            action = function()
+                M
+                    .activate_all_visible_entries(prompt_bufnr)
+            end
+        },
+        {
+            modes = { "i", "n" },
+            key = cfg.keymaps.deactivate_all_visible,
+            action = function()
+                M
+                    .deactivate_all_visible_entries(prompt_bufnr)
+            end
+        },
+        { modes = { "i", "n" }, key = cfg.keymaps.toggle_selection, action = M.toggle_selection(prompt_bufnr) },
+        {
+            modes = { "i", "n" },
+            key = cfg.keymaps.fast_copy_all,
+            action = function()
+                M.copy_all_files(
+                    prompt_bufnr)
+            end
+        },
+    }
 
-    -- Update mappings for new actions
-    map("i", cfg.keymaps.toggle_all, function()
-        M.toggle_all_files(prompt_bufnr)
-    end)
-    map("n", cfg.keymaps.toggle_all, function()
-        M.toggle_all_files(prompt_bufnr)
-    end)
-    map("i", cfg.keymaps.invert_selection, function()
-        M.invert_selection(prompt_bufnr)
-    end)
-    map("n", cfg.keymaps.invert_selection, function()
-        M.invert_selection(prompt_bufnr)
-    end)
-
-    -- Existing mappings
-    map("i", cfg.keymaps.toggle_selection, M.toggle_selection(prompt_bufnr))
-    map("n", cfg.keymaps.toggle_selection, M.toggle_selection(prompt_bufnr))
-    map("i", cfg.keymaps.fast_copy_all, function()
-        M.copy_all_files(prompt_bufnr)
-    end)
-    map("n", cfg.keymaps.fast_copy_all, function()
-        M.copy_all_files(prompt_bufnr)
-    end)
+    for _, mapping in ipairs(mappings) do
+        for _, mode in ipairs(mapping.modes) do
+            map(mode, mapping.key, mapping.action)
+        end
+    end
 
     return true
 end
