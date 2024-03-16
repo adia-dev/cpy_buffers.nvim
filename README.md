@@ -2,6 +2,12 @@
 
 Cpy Buffers is a Neovim plugin that leverages Telescope to enable copying the contents of multiple files into the clipboard with ease. It's designed to streamline the process of managing and manipulating files directly from Neovim, making it a valuable tool for developers.
 
+## Demo
+
+https://github.com/adia-dev/cpy_buffers.nvim/assets/63371699/9c6a5090-4ffa-4b78-8296-a3391a17c840
+
+
+
 ## Requirements
 
 - Neovim (0.8.0 or higher)
