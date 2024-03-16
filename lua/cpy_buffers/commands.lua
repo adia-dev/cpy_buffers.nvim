@@ -8,13 +8,13 @@ function M.change_rg_command()
 	config.update_rg_options(new_command)
 end
 
-function M.toggle_gitignore()
-	config.toggle_gitignore()
+function M.toggle_hidden()
+	config.toggle_hidden()
 end
 
 function M.register_commands()
 	vim.cmd('command! CpyBufChangeRgCommand lua require("cpy_buffers.commands").change_rg_command()')
-	vim.cmd('command! CpyBufToggleGitignore lua require("cpy_buffers.commands").toggle_gitignore()')
+	vim.cmd('command! CpyBufToggleGitignore lua require("cpy_buffers.commands").toggle_hidden()')
 end
 
 return M

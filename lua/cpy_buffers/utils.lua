@@ -1,3 +1,4 @@
+local finders = require("telescope.finders")
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 local config = require("cpy_buffers.config")
@@ -14,7 +15,7 @@ function M.copy_contents_of_selected_files()
             table.insert(paths, path)
             local file_content, err = vim.fn.readfile(path)
             if err then
-                print("Error reading file: " .. path .. "\n" .. err)
+                vim.api.nvim_err_writeln("Error reading file: " .. path)
                 goto continue
             end
             table.insert(contents, "# " .. path)
@@ -48,7 +49,7 @@ function M.copy_all_files(prompt_bufnr)
     local entries = current_picker.finder.results
 
     if not entries or vim.tbl_isempty(entries) then
-        print("No files to copy")
+        vim.api.nvim_echo({ { "No files to copy", "WarningMsg" } }, true, {})
         return
     end
 
@@ -71,7 +72,7 @@ function M.toggle_all_files(prompt_bufnr)
     local current_picker = action_state.get_current_picker(prompt_bufnr)
     local entries = current_picker.finder.results
     if not entries or vim.tbl_isempty(entries) then
-        print("No files to toggle")
+        vim.api.nvim_echo({ { "No files to select", "WarningMsg" } }, true, {})
         return
     end
 
@@ -190,6 +191,34 @@ function M.attach_mappings(prompt_bufnr, map)
             action = function()
                 M.copy_all_files(
                     prompt_bufnr)
+            end
+        },
+        {
+            modes = { "i", "n" },
+            key = cfg.keymaps.toggle_hidden,
+            action = function()
+                config.toggle_hidden()
+                -- refresh the picker
+                local current_picker = action_state.get_current_picker(prompt_bufnr)
+                local rg_command
+                if config.get_state().hide_hidden_files then
+                    rg_command = { "rg", "--files", "--hidden", "--glob", "!.git/*", "--glob", "!node_modules/*",
+                        "--glob", "!vendor/*" }
+                else
+                    rg_command = { "rg", "--files", "--hidden" }
+                end
+
+                for opt in string.gmatch(config.get_state().rg_options, "%S+") do
+                    table.insert(rg_command, opt)
+                end
+
+                current_picker:refresh(finders.new_oneshot_job(rg_command))
+
+                if config.get_state().hide_hidden_files then
+                    vim.api.nvim_echo({ { "Hiding hidden files", "Normal" } }, true, {})
+                else
+                    vim.api.nvim_echo({ { "Showing hidden files", "Normal" } }, true, {})
+                end
             end
         },
     }

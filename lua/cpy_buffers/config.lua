@@ -9,14 +9,15 @@ M.defaults = {
 		activate_all_visible = "<C-v>",
 		deactivate_all_visible = "<C-d>",
 		invert_selection = "<C-r>",
+		toggle_hidden = "<leader>g",
 	},
-	hide_gitignored_files = true,
+	hide_hidden_files = true,
 	prompt_title = "Cpy Buffers",
 	additional_rg_options = "",
 }
 
 M.state = {
-	hide_gitignored_files = M.defaults.hide_gitignored_files,
+	hide_hidden_files = M.defaults.hide_hidden_files,
 	rg_options = M.defaults.additional_rg_options,
 }
 
@@ -24,7 +25,7 @@ function M.setup(user_config)
 	M.config = vim.tbl_deep_extend("force", {}, M.defaults, user_config or {})
 
 	M.state.rg_options = M.config.additional_rg_options
-	M.state.hide_gitignored_files = M.config.hide_gitignored_files
+	M.state.hide_hidden_files = M.config.hide_hidden_files
 end
 
 function M.get_config()
@@ -37,8 +38,8 @@ end
 
 -- toggles/update
 -- TODO: maybe use this fn directly instead of using an indirection
-function M.toggle_gitignore()
-	M.state.hide_gitignored_files = not M.state.hide_gitignored_files
+function M.toggle_hidden()
+	M.state.hide_hidden_files = not M.state.hide_hidden_files
 end
 
 function M.update_rg_options(new_options)

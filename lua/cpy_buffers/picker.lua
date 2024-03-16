@@ -2,7 +2,6 @@ local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
 local actions = require("telescope.actions")
 local previewers = require("telescope.previewers")
-local action_state = require("telescope.actions.state")
 local conf = require("telescope.config").values
 local config = require("cpy_buffers.config")
 local utils = require("cpy_buffers.utils")
@@ -15,9 +14,13 @@ function M.open_file_picker(opts)
 	local cfg_state = config.get_state()
 	local rg_command = { "rg", "--files", "--hidden" }
 
-	if cfg_state.hide_gitignored_files then
+	if cfg_state.hide_hidden_files then
 		table.insert(rg_command, "--glob")
 		table.insert(rg_command, "!.git/*")
+		table.insert(rg_command, "--glob")
+		table.insert(rg_command, "!node_modules/*")
+		table.insert(rg_command, "--glob")
+		table.insert(rg_command, "!vendor/*")
 	end
 
 	for opt in string.gmatch(cfg_state.rg_options, "%S+") do
@@ -33,6 +36,10 @@ function M.open_file_picker(opts)
 			attach_mappings = utils.attach_mappings,
 		})
 		:find()
+end
+
+function M.close_picker(prompt_bufnr)
+	actions.close(prompt_bufnr)
 end
 
 return M

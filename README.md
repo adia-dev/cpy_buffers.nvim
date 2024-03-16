@@ -1,78 +1,86 @@
-# Neovim Telescope Extension: cpy_buffers.nvim
+# Cpy Buffers for Neovim
 
-`cpy_buffers.nvim` is an extension for the Neovim Telescope plugin. It enhances the file picking experience by allowing users to select multiple files and copy their contents to the clipboard or a buffer. This extension is especially useful for quickly aggregating content from various files within a project.
-
-## Demo
-
-[Video Demo](https://github.com/adia-dev/cpy_buffers.nvim/assets/63371699/2ca0ef2d-819b-48c5-aae0-d7d0f102ad42)
-
-## Features
-
-- **File Picker**: Seamlessly list and select multiple files within your Neovim environment.
-- **Clipboard Integration**: Copy the contents of selected files directly to the clipboard.
-- **Toggle Selection**: Easily select or deselect files using the space key.
-- **Preview Files**: Preview the contents of files before selecting them.
-- **Dynamic Configuration**: Change `ripgrep` command options and toggle gitignored file filtering on the fly.
+Cpy Buffers is a Neovim plugin that leverages Telescope to enable copying the contents of multiple files into the clipboard with ease. It's designed to streamline the process of managing and manipulating files directly from Neovim, making it a valuable tool for developers.
 
 ## Requirements
 
-- **Telescope**: Ensure Telescope is correctly installed in your Neovim setup. [Installation Guide](https://github.com/nvim-telescope/telescope.nvim).
-- **Rg**: This extension utilizes RipGrep, so ensure it's installed. [RipGrep GitHub](https://github.com/BurntSushi/ripgrep).
+- Neovim (0.8.0 or higher)
+- [Telescope](https://github.com/nvim-telescope/telescope.nvim)
+- [Ripgrep](https://github.com/BurntSushi/ripgrep) for efficient file searching
+- git, for handling gitignore functionality
 
 ## Installation
 
-To install `cpy_buffers.nvim`, add the following line to your Neovim configuration:
+### Packer
 
-```bash
-Plug 'adia-dev/cpy_buffers.nvim'
-```
-
-Or, using `packer.nvim`:
+If you're using Packer, add the following to your Neovim configuration:
 
 ```lua
-use({
-    "adia-dev/cpy_buffers.nvim",
-    requires = { "nvim-telescope/telescope.nvim" },
+use {
+  'adia-dev/cpy_buffers',
+  requires = { {'nvim-telescope/telescope.nvim'} }
+}
+```
+
+The process is similar for other package managers.
+
+## Configuration
+
+To initialize the plugin with (optional) custom configurations, add the following to your Neovim setup, here are the default configurations:
+
+```lua
+require('cpy_buffers').setup({
+	keymaps = {
+		open_picker = "<leader>fc",
+		toggle_hidden = "<leader>g",
+		toggle_selection = "<TAB>",
+		fast_copy_all = "<C-a>",
+		toggle_all = "<C-t>",
+		activate_all_visible = "<C-v>",
+		deactivate_all_visible = "<C-d>",
+		invert_selection = "<C-r>",
+	},
+	hide_hidden_files = true,
+	prompt_title = "Cpy Buffers",
+	-- Additional options for the `rg` command, e.g. "--hidden --no-ignore"
+	additional_rg_options = "",
 })
 ```
 
-## Setup
+### Default Keymaps
 
-```lua
-require("cpy_buffers").setup({
-    keymaps = {
-        open_picker = "<leader>fc",
-        toggle_selection = "<TAB>"
-    },
-    hide_gitignored_files = true,
-    prompt_title = "Cpy Buffers",
-    additional_rg_options = "",
-})
-```
+- `<leader>fc`: Open the file picker
+- `<leader>g`: Toggle visibility of hidden files
+- `<TAB>`: Toggle selection of a file
+- `<C-a>`: Copy the contents of all selected files to the clipboard
+- `<C-t>`: Toggle the selection of all files
+- `<C-v>`: Activate all visible files in the picker
+- `<C-d>`: Deactivate all visible files in the picker
+- `<C-r>`: Invert the current selection
+
+You can customize these keymaps in the setup configuration.
 
 ## Usage
 
-Once installed, use the following commands:
+After installation and configuration, use the plugin by invoking the file picker with the configured shortcut (default: `<leader>fc`). Within the picker:
 
-- `<leader>fc`: Open the file picker.
-- `<TAB>`: Toggle the selection of files.
-- `Enter`: Copy the contents of selected files to the clipboard.
+- Use `<TAB>` to select or deselect files.
+- Press `<C-a>` to copy the contents of all selected files to the clipboard.
+- Adjust visibility of hidden files and change `rg` command options directly from Neovim's command line interface or through the plugin's setup configuration.
 
-## Custom Commands
+## Extending and Customizing
 
-- `:CpyBufChangeRgCommand`: Change the `ripgrep` command options.
-- `:CpyBufToggleGitignore`: Toggle the inclusion of gitignored files.
+Cpy Buffers allows for extensive customization. You can modify key bindings, toggle gitignore filtering, and change `rg` command options to fit your workflow.
 
-## Keybindings
+### Commands
 
-- `<leader>fc`: Open the file picker.
-- `<TAB>`: Toggle selection of files in the picker.
+- `:CpyBufChangeRgCommand`: Change the `rg` command options for file searching.
+- `:CpyBufToggleGitignore`: Toggle the inclusion of hidden files in the search results.
 
 ## Contributing
 
-Contributions to `cpy_buffers.nvim` are welcome! Feel free to submit suggestions, bug reports, or code contributions through issues or pull requests in the repository.
+Contributions are welcome! Feel free to open an issue or submit a pull request on GitHub.
 
 ## License
 
-This extension is distributed under the MIT License. See the LICENSE file in the repository for more details.
-
+This project is licensed under [MIT](https://opensource.org/licenses/MIT).
