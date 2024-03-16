@@ -7,6 +7,8 @@ local M = {}
 
 M.selected_entries = {}
 
+
+
 function M.copy_contents_of_selected_files()
     local contents = {}
     local paths = {}
@@ -18,7 +20,9 @@ function M.copy_contents_of_selected_files()
                 vim.api.nvim_err_writeln("Error reading file: " .. path)
                 goto continue
             end
-            table.insert(contents, "# " .. path)
+            if config.get_config().label_buffers then
+                table.insert(contents, M.format_label(config.get_config().label_format, path))
+            end
             table.insert(contents, table.concat(file_content, "\n"))
         end
         ::continue::
@@ -142,6 +146,32 @@ function M.invert_selection(prompt_bufnr)
     end
 end
 
+function M.toggle_selection(prompt_bufnr)
+    return function()
+        local selection = action_state.get_selected_entry()
+        if selection then
+            actions.toggle_selection(prompt_bufnr)
+            M.selected_entries[selection.value] = not M.selected_entries[selection.value]
+        end
+    end
+end
+
+function M.format_label(format, path)
+    local short_name = vim.fn.fnamemodify(path, ":.")
+    local relative_path = vim.fn.fnamemodify(path, ":~:.:h")
+    local absolute_path = vim.fn.fnamemodify(path, ":p")
+    -- local number = vim.fn.bufnr(path)
+    -- local modified = vim.fn.getbufvar(number, "&modified") == 1 and "[+]" or ""
+    local label = format:gsub("%%f", relative_path)
+
+
+    label = label:gsub("%%c", short_name)
+    label = label:gsub("%%a", absolute_path)
+    -- label = label:gsub("%%n", number)
+    -- label = label:gsub("%%m", modified)
+    return label
+end
+
 function M.attach_mappings(prompt_bufnr, map)
     M.selected_entries = {}
 
@@ -230,16 +260,6 @@ function M.attach_mappings(prompt_bufnr, map)
     end
 
     return true
-end
-
-function M.toggle_selection(prompt_bufnr)
-    return function()
-        local selection = action_state.get_selected_entry()
-        if selection then
-            actions.toggle_selection(prompt_bufnr)
-            M.selected_entries[selection.value] = not M.selected_entries[selection.value]
-        end
-    end
 end
 
 return M

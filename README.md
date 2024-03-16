@@ -36,6 +36,18 @@ require('cpy_buffers').setup({
 		toggle_selection = "<TAB>",
 		fast_copy_all = "<C-a>",
 		toggle_all = "<C-t>",
+		label_buffers = true, -- show buffer labels at the top of each buffer
+		-- format string for buffer labels at the top of each buffer
+		-- %f will be replaced with the buffer's relative path to the directory
+		-- %c will be replaced with the buffer's short name
+		-- %a will be replaced with the buffer's absolute path
+		-- TODO: %n will be replaced with the buffer's number
+		-- TODO: %m will be replaced with the buffer's modified status
+		-- e.g: "%n %c %m" will result in "1 init.lua [+]"
+		-- e.g: "%f" will result in "lua/cpy_buffers"
+		-- e.g: "// %a" will result in "// /home/user/.../lua/cpy_buffers/init.lua"
+		-- e.g: "# %f" will result in "# lua/cpy_buffers"
+		label_format = "# %c",
 		activate_all_visible = "<C-v>",
 		deactivate_all_visible = "<C-d>",
 		invert_selection = "<C-r>",
@@ -76,6 +88,7 @@ Cpy Buffers allows for extensive customization. You can modify key bindings, tog
 
 - `:CpyBufChangeRgCommand`: Change the `rg` command options for file searching.
 - `:CpyBufToggleGitignore`: Toggle the inclusion of hidden files in the search results.
+- `:CpyBufChangeLabelFormat`: Change the format of the buffer labels at the top of each buffer.
 
 ## Contributing
 
