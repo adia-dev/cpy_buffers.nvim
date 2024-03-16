@@ -1,6 +1,10 @@
 local M = {}
 
 M.defaults = {
+	-- register to use for copy operations
+	-- e.g: `+` will use the system clipboard (default)
+	-- e.g: `"` will use the unnamed register, good for yanking inside vim
+	register = "+",
 	keymaps = {
 		open_picker = "<leader>fc",
 		toggle_selection = "<TAB>",

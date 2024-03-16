@@ -8,7 +8,7 @@ function M.setup(opts)
 	opts = opts or {}
 	config.setup(opts)
 	keymaps.setup()
-    commands.register_commands()
+	commands.register_commands()
 end
 
 return M

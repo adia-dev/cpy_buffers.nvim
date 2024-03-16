@@ -6,8 +6,6 @@ Cpy Buffers is a Neovim plugin that leverages Telescope to enable copying the co
 
 https://github.com/adia-dev/cpy_buffers.nvim/assets/63371699/9c6a5090-4ffa-4b78-8296-a3391a17c840
 
-
-
 ## Requirements
 
 - Neovim (0.8.0 or higher)
@@ -36,6 +34,10 @@ To initialize the plugin with (optional) custom configurations, add the followin
 
 ```lua
 require('cpy_buffers').setup({
+	-- register to use for copy operations
+	-- e.g: `+` will use the system clipboard (default)
+	-- e.g: `"` will use the unnamed register, good for yanking inside vim
+	register = "+",
 	keymaps = {
 		open_picker = "<leader>fc",
 		toggle_hidden = "<leader>g",

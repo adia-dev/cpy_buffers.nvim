@@ -7,8 +7,6 @@ local M = {}
 
 M.selected_entries = {}
 
-
-
 function M.copy_contents_of_selected_files()
     local contents = {}
     local paths = {}
@@ -30,13 +28,12 @@ function M.copy_contents_of_selected_files()
 
 
     local all_contents = table.concat(contents, "\n\n")
-    vim.fn.setreg("+", all_contents)
+    vim.fn.setreg(config.get_config().register, all_contents)
 
     if vim.tbl_isempty(contents) then
         vim.api.nvim_echo({ { "No files were copied", "WarningMsg" } }, true, {})
         return
     else
-        -- message to print the paths of the copied files in a bullet list
         local message = "Copied the contents of the following files:\n"
         for _, path in ipairs(paths) do
             message = message .. "  - " .. path .. "\n"
@@ -57,15 +54,12 @@ function M.copy_all_files(prompt_bufnr)
         return
     end
 
-    -- Select all entries
     for _, entry in ipairs(entries) do
         M.selected_entries[entry.value] = true
     end
 
-    -- Now copy the contents
     M.copy_contents_of_selected_files()
 
-    -- Close the picker
     actions.close(prompt_bufnr)
     M.selected_entries = {}
 end
@@ -228,8 +222,7 @@ function M.attach_mappings(prompt_bufnr, map)
             key = cfg.keymaps.toggle_hidden,
             action = function()
                 config.toggle_hidden()
-                -- refresh the picker
-                local current_picker = action_state.get_current_picker(prompt_bufnr)
+
                 local rg_command
                 if config.get_state().hide_hidden_files then
                     rg_command = { "rg", "--files", "--hidden", "--glob", "!.git/*", "--glob", "!node_modules/*",
@@ -242,6 +235,7 @@ function M.attach_mappings(prompt_bufnr, map)
                     table.insert(rg_command, opt)
                 end
 
+                local current_picker = action_state.get_current_picker(prompt_bufnr)
                 current_picker:refresh(finders.new_oneshot_job(rg_command))
 
                 if config.get_state().hide_hidden_files then
