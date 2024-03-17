@@ -101,7 +101,3 @@ Cpy Buffers allows for extensive customization. You can modify key bindings, tog
 ## Contributing
 
 Contributions are welcome! Feel free to open an issue or submit a pull request on GitHub.
-
-## License
-
-This project is licensed under [MIT](https://opensource.org/licenses/MIT).
