@@ -23,12 +23,12 @@ function M.open_file_picker(opts)
 		table.insert(rg_command, "!vendor/*")
 	end
 
-	for _, pattern in ipairs(cfg.exclude_patterns or {}) do
+	for _, pattern in ipairs(cfg.file_search.exclude_patterns or {}) do
 		table.insert(rg_command, "--glob")
 		table.insert(rg_command, "!" .. pattern)
 	end
 
-	for _, ext in ipairs(cfg.include_extensions or {}) do
+	for _, ext in ipairs(cfg.file_search.include_extensions or {}) do
 		table.insert(rg_command, "--glob")
 		table.insert(rg_command, "*" .. ext)
 	end
@@ -38,7 +38,7 @@ function M.open_file_picker(opts)
 	end
 
 	local sorter
-	if cfg.use_custom_sorter then
+	if cfg.sorting.use_custom_sorter then
 		sorter = utils.get_custom_sorter(opts)
 	else
 		sorter = conf.generic_sorter(opts)
@@ -46,7 +46,7 @@ function M.open_file_picker(opts)
 
 	pickers
 		.new(opts, {
-			prompt_title = cfg.prompt_title .. " (Toggle Selection: " .. cfg.keymaps.toggle_selection .. ")",
+			prompt_title = cfg.display.prompt_title .. " (Toggle Selection: " .. cfg.keymaps.toggle_selection .. ")",
 			results_title = "Results (Copy All: "
 				.. cfg.keymaps.fast_copy_all
 				.. ", Toggle All: "

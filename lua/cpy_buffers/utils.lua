@@ -42,7 +42,7 @@ function M.get_entry_maker()
 		local icon = ""
 		local icon_highlight = ""
 
-		if cfg.show_icons then
+		if cfg.display.show_icons then
 			icon, icon_highlight = devicons.get_icon(filename, ext, { default = true })
 		end
 
@@ -135,8 +135,8 @@ function M.copy_contents_of_selected_files()
 			if err then
 				vim.api.nvim_err_writeln(err)
 			else
-				if cfg.label_buffers then
-					local label = M.format_label(cfg.label_format, path)
+				if cfg.display.label_buffers then
+					local label = M.format_label(cfg.display.label_format, path)
 					table.insert(contents, label)
 					total_chars = total_chars + #label + 2 -- +2 for separators
 				end
@@ -151,7 +151,7 @@ function M.copy_contents_of_selected_files()
 		return
 	end
 
-	local separator = cfg.content_separator or "\n\n"
+	local separator = cfg.display.content_separator or "\n\n"
 	local all_contents = table.concat(contents, separator)
 	vim.fn.setreg(cfg.register, all_contents)
 
@@ -492,8 +492,8 @@ function M.copy_contents_to_new_buffer()
 			if err then
 				vim.api.nvim_err_writeln(err)
 			else
-				if cfg.label_buffers then
-					local label = M.format_label(cfg.label_format, path)
+				if cfg.display.label_buffers then
+					local label = M.format_label(cfg.display.label_format, path)
 					table.insert(contents, label)
 					total_chars = total_chars + #label + 2
 				end
@@ -508,7 +508,7 @@ function M.copy_contents_to_new_buffer()
 		return
 	end
 
-	local separator = cfg.content_separator or "\n\n"
+	local separator = cfg.display.content_separator or "\n\n"
 	local all_contents = table.concat(contents, separator)
 
 	if vim.api.nvim_buf_get_option(0, "modified") then
@@ -544,8 +544,8 @@ function M.save_contents_to_file()
 			if err then
 				vim.api.nvim_err_writeln(err)
 			else
-				if cfg.label_buffers then
-					local label = M.format_label(cfg.label_format, path)
+				if cfg.display.label_buffers then
+					local label = M.format_label(cfg.display.label_format, path)
 					table.insert(contents, label)
 				end
 				table.insert(contents, data)
@@ -558,7 +558,7 @@ function M.save_contents_to_file()
 		return
 	end
 
-	local separator = cfg.content_separator or "\n\n"
+	local separator = cfg.display.content_separator or "\n\n"
 	local all_contents = table.concat(contents, separator)
 
 	local filepath = vim.fn.input("Save to file: ", "", "file")
