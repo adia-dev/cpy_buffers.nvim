@@ -4,6 +4,9 @@ local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 local config = require("cpy_buffers.config")
 
+local devicons = require("nvim-web-devicons")
+local entry_display = require("telescope.pickers.entry_display")
+
 local M = {}
 
 M.selected_entries = {}
@@ -30,7 +33,25 @@ function M.get_entry_maker()
 			return nil
 		end
 
-		-- Format file size nicely
+		local cfg = config.get_config()
+
+		-- Get file attributes
+		local relative_path = vim.fn.fnamemodify(entry, ":.") -- Relative path
+		local filename = vim.fn.fnamemodify(entry, ":t") -- Filename
+		local ext = filename:match("%.([^%.]+)$") or ""
+		local icon = ""
+		local icon_highlight = ""
+
+		if cfg.show_icons then
+			icon, icon_highlight = devicons.get_icon(filename, ext, { default = true })
+		end
+
+		if not icon then
+			icon = " " -- Default icon
+			icon_highlight = ""
+		end
+
+		-- Format size
 		local size_str = ""
 		if stats.size < 1024 then
 			size_str = string.format("%dB", stats.size)
@@ -40,22 +61,26 @@ function M.get_entry_maker()
 			size_str = string.format("%.1fMB", stats.size / (1024 * 1024))
 		end
 
-		-- Format modification time
-		local mtime_str = os.date("%Y-%m-%d %H:%M", stats.mtime)
+		-- Create displayer
+		local displayer = entry_display.create({
+			separator = " ",
+			items = {
+				{ width = 2 }, -- Icon
+				{ width = 10 }, -- Size
+				{ remaining = true }, -- Relative path
+			},
+		})
 
-		-- Get file extension
-		local ext = entry:match("%.([^%.]+)$") or ""
+		local display = displayer({
+			{ icon, icon_highlight },
+			size_str,
+			relative_path,
+		})
 
 		return {
 			value = entry,
-			display = string.format(
-				"%-50s %10s  %19s  [%s]",
-				vim.fn.fnamemodify(entry, ":."),
-				size_str,
-				mtime_str,
-				ext:upper()
-			),
-			ordinal = entry,
+			display = display,
+			ordinal = relative_path,
 		}
 	end
 end

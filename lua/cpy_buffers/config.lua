@@ -27,6 +27,7 @@ M.defaults = {
 	sort_by_size = false,
 	sort_by_extension = false,
 	use_custom_sorter = false,
+	show_icons = true,
 }
 
 M.state = {
