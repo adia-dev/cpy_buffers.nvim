@@ -66,15 +66,15 @@ function M.get_entry_maker()
 			separator = " ",
 			items = {
 				{ width = 2 }, -- Icon
+				{ width = 55 }, -- Relative path
 				{ width = 10 }, -- Size
-				{ remaining = true }, -- Relative path
 			},
 		})
 
 		local display = displayer({
 			{ icon, icon_highlight },
-			size_str,
 			relative_path,
+			size_str,
 		})
 
 		return {
@@ -363,6 +363,7 @@ function M.attach_mappings(prompt_bufnr, map)
 			action = function()
 				M.toggle_all_files(prompt_bufnr)
 			end,
+			description = "[CpyBuffers] Toggle all files",
 		},
 		{
 			modes = { "i", "n" },
@@ -370,6 +371,7 @@ function M.attach_mappings(prompt_bufnr, map)
 			action = function()
 				M.invert_selection(prompt_bufnr)
 			end,
+			description = "[CpyBuffers] Invert selection",
 		},
 		{
 			modes = { "i", "n" },
@@ -377,6 +379,7 @@ function M.attach_mappings(prompt_bufnr, map)
 			action = function()
 				M.activate_all_visible_entries(prompt_bufnr)
 			end,
+			description = "[CpyBuffers] Activate all visible entries",
 		},
 		{
 			modes = { "i", "n" },
@@ -384,14 +387,21 @@ function M.attach_mappings(prompt_bufnr, map)
 			action = function()
 				M.deactivate_all_visible_entries(prompt_bufnr)
 			end,
+			description = "[CpyBuffers] Deactivate all visible entries",
 		},
-		{ modes = { "i", "n" }, key = cfg.keymaps.toggle_selection, action = M.toggle_selection(prompt_bufnr) },
+		{
+			modes = { "i", "n" },
+			key = cfg.keymaps.toggle_selection,
+			action = M.toggle_selection(prompt_bufnr),
+			description = "[CpyBuffers] Toggle selection",
+		},
 		{
 			modes = { "i", "n" },
 			key = cfg.keymaps.fast_copy_all,
 			action = function()
 				M.copy_all_files(prompt_bufnr)
 			end,
+			description = "[CpyBuffers] Copy all files",
 		},
 		{
 			modes = { "i", "n" },
@@ -400,6 +410,7 @@ function M.attach_mappings(prompt_bufnr, map)
 				actions.close(prompt_bufnr)
 				M.copy_contents_to_new_buffer()
 			end,
+			description = "[CpyBuffers] Copy contents to new buffer",
 		},
 		{
 			modes = { "i", "n" },
@@ -408,6 +419,7 @@ function M.attach_mappings(prompt_bufnr, map)
 				M.save_contents_to_file()
 				actions.close(prompt_bufnr)
 			end,
+			description = "[CpyBuffers] Save contents to file",
 		},
 		{
 			modes = { "i", "n" },
@@ -416,10 +428,12 @@ function M.attach_mappings(prompt_bufnr, map)
 				M.copy_file_paths()
 				actions.close(prompt_bufnr)
 			end,
+			description = "[CpyBuffers] Copy file paths",
 		},
 		{
 			modes = { "i", "n" },
 			key = cfg.keymaps.toggle_hidden,
+			description = "[CpyBuffers] Toggle hidden files",
 			action = function()
 				config.toggle_hidden()
 
@@ -458,7 +472,7 @@ function M.attach_mappings(prompt_bufnr, map)
 
 	for _, mapping in ipairs(mappings) do
 		for _, mode in ipairs(mapping.modes) do
-			map(mode, mapping.key, mapping.action)
+			map(mode, mapping.key, mapping.action, { desc = mapping.description })
 		end
 	end
 

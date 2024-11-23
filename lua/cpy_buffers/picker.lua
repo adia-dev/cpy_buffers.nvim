@@ -46,7 +46,12 @@ function M.open_file_picker(opts)
 
 	pickers
 		.new(opts, {
-			prompt_title = cfg.prompt_title,
+			prompt_title = cfg.prompt_title .. " (Toggle Selection: " .. cfg.keymaps.toggle_selection .. ")",
+			results_title = "Results (Copy All: "
+				.. cfg.keymaps.fast_copy_all
+				.. ", Toggle All: "
+				.. cfg.keymaps.toggle_all
+				.. ")",
 			finder = finders.new_oneshot_job(rg_command, {
 				entry_maker = utils.get_entry_maker(),
 			}),
