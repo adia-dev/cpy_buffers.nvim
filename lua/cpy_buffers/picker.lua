@@ -23,16 +23,49 @@ function M.open_file_picker(opts)
 		table.insert(rg_command, "!vendor/*")
 	end
 
+	for _, pattern in ipairs(cfg.exclude_patterns or {}) do
+		table.insert(rg_command, "--glob")
+		table.insert(rg_command, "!" .. pattern)
+	end
+
+	for _, ext in ipairs(cfg.include_extensions or {}) do
+		table.insert(rg_command, "--glob")
+		table.insert(rg_command, "*" .. ext)
+	end
+
 	for opt in string.gmatch(cfg_state.rg_options, "%S+") do
 		table.insert(rg_command, opt)
+	end
+
+	local sorter
+	if cfg.use_custom_sorter then
+		sorter = utils.get_custom_sorter(opts)
+	else
+		sorter = conf.generic_sorter(opts)
 	end
 
 	pickers
 		.new(opts, {
 			prompt_title = cfg.prompt_title,
-			finder = finders.new_oneshot_job(rg_command),
-			previewer = previewers.cat.new({}),
-			sorter = conf.generic_sorter(opts),
+			finder = finders.new_oneshot_job(rg_command, {
+				entry_maker = utils.get_entry_maker(),
+			}),
+			previewer = previewers.new_buffer_previewer({
+				title = "File Preview",
+				define_preview = function(self, entry)
+					local content = utils.handle_file_preview(entry)
+					if content then
+						vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, vim.split(content, "\n"))
+
+						-- Set filetype for syntax highlighting
+						local ft = vim.filetype.match({ filename = entry.value })
+						if ft then
+							vim.api.nvim_buf_set_option(self.state.bufnr, "filetype", ft)
+						end
+					end
+				end,
+			}),
+			sorter = sorter,
 			attach_mappings = utils.attach_mappings,
 		})
 		:find()

@@ -1,9 +1,6 @@
 local M = {}
 
 M.defaults = {
-	-- register to use for copy operations
-	-- e.g: `+` will use the system clipboard (default)
-	-- e.g: `"` will use the unnamed register, good for yanking inside vim
 	register = "+",
 	keymaps = {
 		open_picker = "<leader>fc",
@@ -14,22 +11,22 @@ M.defaults = {
 		deactivate_all_visible = "<C-d>",
 		invert_selection = "<C-r>",
 		toggle_hidden = "<leader>g",
+		copy_to_buffer = "<C-b>",
+		save_to_file = "<C-s>",
+		copy_paths = "<C-p>",
 	},
 	label_buffers = true,
-	-- format string for buffer labels at the top of each buffer
-	-- %f will be replaced with the buffer's relative path to the directory
-	-- %c will be replaced with the buffer's short name
-	-- %a will be replaced with the buffer's absolute path
-	-- TODO: %n will be replaced with the buffer's number
-	-- TODO: %m will be replaced with the buffer's modified status
-	-- e.g: "%n %c %m" will result in "1 init.lua [+]"
-	-- e.g: "%f" will result in "lua/cpy_buffers"
-	-- e.g: "// %a" will result in "// /home/user/.../lua/cpy_buffers/init.lua"
-	-- e.g: "# %f" will result in "# lua/cpy_buffers"
 	label_format = "# %c",
 	hide_hidden_files = true,
 	prompt_title = "Cpy Buffers",
 	additional_rg_options = "",
+	content_separator = "\n\n",
+	include_extensions = {},
+	exclude_patterns = { "node_modules/*", "vendor/*" },
+	sort_by_modification = false,
+	sort_by_size = false,
+	sort_by_extension = false,
+	use_custom_sorter = false,
 }
 
 M.state = {
