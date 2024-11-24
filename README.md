@@ -1,103 +1,210 @@
-# Cpy Buffers for Neovim
+# CpyBuffers.nvim
 
-Cpy Buffers is a Neovim plugin that leverages Telescope to enable copying the contents of multiple files into the clipboard with ease. It's designed to streamline the process of managing and manipulating files directly from Neovim, making it a valuable tool for developers.
+> 🔍 A powerful Neovim plugin for copying and managing file contents with an intuitive Telescope interface.
 
-## Demo
+[INSERT DEMO GIF/IMAGE HERE]
 
-https://github.com/adia-dev/cpy_buffers.nvim/assets/63371699/9c6a5090-4ffa-4b78-8296-a3391a17c840
+## ✨ Features
 
-## Requirements
+- 🚀 **Fast and Efficient**: Quick file content copying powered by Telescope's fuzzy finder
+- 📋 **Multi-Selection**: Select multiple files and copy their contents with ease
+- 🎨 **Rich Preview**: Built-in file preview with syntax highlighting
+- 🛠️ **Highly Configurable**: Customize everything from keymaps to display formats
+- 🎯 **Smart Filtering**: Advanced file filtering with ripgrep integration
+- 📝 **Buffer Labels**: Organize copied content with customizable file labels
 
-- Neovim (0.8.0 or higher)
-- [Telescope](https://github.com/nvim-telescope/telescope.nvim)
-- [Ripgrep](https://github.com/BurntSushi/ripgrep) for efficient file searching
-- git, for handling gitignore functionality
+## 🖼️ Screenshots
 
-## Installation
+[INSERT SCREENSHOTS HERE]
 
-### Packer
+## 📥 Installation
 
-If you're using Packer, add the following to your Neovim configuration:
+<details>
+<summary>Using <a href="https://github.com/folke/lazy.nvim">lazy.nvim</a></summary>
 
 ```lua
-use {
-  'adia-dev/cpy_buffers',
-  requires = { {'nvim-telescope/telescope.nvim'} }
+{
+  "adia-dev/cpy-buffers.nvim",
+  dependencies = {
+    "nvim-telescope/telescope.nvim",
+    "nvim-lua/plenary.nvim",
+    "nvim-tree/nvim-web-devicons", -- optional, for file icons
+  },
+  config = function()
+    require("cpy_buffers").setup({
+      -- your configuration
+    })
+  end,
 }
 ```
 
-The process is similar for other package managers.
+</details>
 
-## Configuration
-
-To initialize the plugin with (optional) custom configurations, add the following to your Neovim setup, here are the default configurations:
+<details>
+<summary>Using <a href="https://github.com/wbthomason/packer.nvim">packer.nvim</a></summary>
 
 ```lua
-require('cpy_buffers').setup({
-	-- register to use for copy operations
-	-- e.g: `+` will use the system clipboard (default)
-	-- e.g: `"` will use the unnamed register, good for yanking inside vim
-	register = "+",
-	keymaps = {
-		open_picker = "<leader>fc",
-		toggle_hidden = "<leader>g",
-		toggle_selection = "<TAB>",
-		fast_copy_all = "<C-a>",
-		toggle_all = "<C-t>",
-		label_buffers = true, -- show buffer labels at the top of each buffer
-		-- format string for buffer labels at the top of each buffer
-		-- %f will be replaced with the buffer's relative path to the directory
-		-- %c will be replaced with the buffer's short name
-		-- %a will be replaced with the buffer's absolute path
-		-- TODO: %n will be replaced with the buffer's number
-		-- TODO: %m will be replaced with the buffer's modified status
-		-- e.g: "%n %c %m" will result in "1 init.lua [+]"
-		-- e.g: "%f" will result in "lua/cpy_buffers"
-		-- e.g: "// %a" will result in "// /home/user/.../lua/cpy_buffers/init.lua"
-		-- e.g: "# %f" will result in "# lua/cpy_buffers"
-		label_format = "# %c",
-		activate_all_visible = "<C-v>",
-		deactivate_all_visible = "<C-d>",
-		invert_selection = "<C-r>",
-	},
-	hide_hidden_files = true,
-	prompt_title = "Cpy Buffers",
-	-- Additional options for the `rg` command, e.g. "--hidden --no-ignore"
-	additional_rg_options = "",
+use {
+  'adia-dev/cpy-buffers.nvim',
+  requires = {
+    'nvim-telescope/telescope.nvim',
+    'nvim-lua/plenary.nvim',
+    'nvim-tree/nvim-web-devicons', -- optional, for file icons
+  },
+  config = function()
+    require('cpy_buffers').setup({
+      -- your configuration
+    })
+  end
+}
+```
+
+</details>
+
+## ⚡️ Quick Start
+
+1. Open the file picker:
+
+```lua
+-- Default keymap
+<leader>cb
+```
+
+2. Select files using:
+
+- `<TAB>` to toggle selection
+- `<C-a>` to select all
+- `<C-t>` to toggle all
+- `<CR>` to copy selected contents
+
+[INSERT QUICK START GIF HERE]
+
+## ⚙️ Configuration
+
+Here's a basic configuration with default values:
+
+```lua
+require("cpy_buffers").setup({
+  register = "+", -- Copy to system clipboard
+  selection_indicator = "✔", -- Selected files indicator
+  selection_caret = "➜ ", -- Selection cursor indicator
+
+  -- Optional: Customize keymaps
+  keymaps = {
+    open_picker = "<leader>cb",
+    toggle_selection = "<TAB>",
+    fast_copy_all = "<C-a>",
+    toggle_all = "<C-t>",
+  },
 })
 ```
 
-### Default Keymaps
+<details>
+<summary>🔧 Full Configuration</summary>
 
-- `<leader>fc`: Open the file picker
-- `<leader>g`: Toggle visibility of hidden files
-- `<TAB>`: Toggle selection of a file
-- `<C-a>`: Copy the contents of all selected files to the clipboard
-- `<C-t>`: Toggle the selection of all files
-- `<C-v>`: Activate all visible files in the picker
-- `<C-d>`: Deactivate all visible files in the picker
-- `<C-r>`: Invert the current selection
+```lua
+{
+	register = "+", -- "+" Copy to the host machine clipboard
+	selection_indicator = "✔", -- Icon for selected entries
+	selection_caret = "➜ ", -- Icon for the selection caret
+	keymaps = {
+		open_picker = "<leader>cb",
+		toggle_selection = "<TAB>",
+		fast_copy_all = "<C-a>",
+		toggle_all = "<C-t>",
+		activate_all_visible = "<C-v>",
+		deactivate_all_visible = "<C-d>",
+		invert_selection = "<C-r>",
+		toggle_hidden = "<leader>g",
+		copy_to_buffer = "<C-b>",
+		save_to_file = "<C-s>",
+		copy_paths = "<C-p>",
+	},
+	highlights = {
+		multi_selection = {
+			guifg = "#7aa2f7", -- Brighter blue for active selection
+			guibg = "#292e42", -- Slightly lighter gray-blue for active background
+		},
+	},
+	log = {
+		use_notify = true,
+		level = vim.log.levels.DEBUG,
+	},
+	-- Change the layout of the picker
+	-- layout_config = {
+	-- 	width = 0.8,
+	-- 	height = 0.9,
+	-- 	prompt_position = "top",
+	-- 	preview_cutoff = 120,
+	-- 	horizontal = {
+	-- 		preview_width = 0.6,
+	-- 	},
+	-- },
+	display = {
+		label_buffers = true,
+		label_format = "-- %c --",
+		prompt_title = "Cpy Buffers",
+		content_separator = "\n\n",
+		show_icons = true,
+	},
+	file_search = {
+		hide_hidden_files = true,
+		additional_rg_options = "",
+		include_extensions = {},
+		exclude_patterns = { "node_modules/*", "vendor/*" },
+	},
+	sorting = {
+		sort_by_modification = false,
+		sort_by_size = false,
+		sort_by_extension = false,
+		use_custom_sorter = false,
+	},
+}
+```
 
-You can customize these keymaps in the setup configuration.
+</details>
 
-## Usage
+<!-- TODO: write the CONFIGURATION.md file -->
+<!-- See [detailed configuration](./CONFIGURATION.md) for all options. -->
 
-After installation and configuration, use the plugin by invoking the file picker with the configured shortcut (default: `<leader>fc`). Within the picker:
+## 🎮 Default Keymaps
 
-- Use `<TAB>` to select or deselect files.
-- Press `<C-a>` to copy the contents of all selected files to the clipboard.
-- Adjust visibility of hidden files and change `rg` command options directly from Neovim's command line interface or through the plugin's setup configuration.
+| Key          | Action               |
+| ------------ | -------------------- |
+| `<leader>cb` | Open file picker     |
+| `<TAB>`      | Toggle selection     |
+| `<C-a>`      | Copy all files       |
+| `<C-t>`      | Toggle all files     |
+| `<C-v>`      | Select all visible   |
+| `<C-d>`      | Deselect all visible |
+| `<C-r>`      | Invert selection     |
+| `<leader>g`  | Toggle hidden files  |
+| `<C-b>`      | Copy to new buffer   |
+| `<C-s>`      | Save to file         |
+| `<C-p>`      | Copy file paths      |
 
-## Extending and Customizing
+## 📚 Commands
 
-Cpy Buffers allows for extensive customization. You can modify key bindings, toggle gitignore filtering, and change `rg` command options to fit your workflow.
+| Command                    | Description            |
+| -------------------------- | ---------------------- |
+| `:CpyBufChangeRgCommand`   | Modify ripgrep options |
+| `:CpyBufToggleGitignore`   | Toggle hidden files    |
+| `:CpyBufChangeLabelFormat` | Change label format    |
 
-### Commands
+## 🔧 Advanced Usage
 
-- `:CpyBufChangeRgCommand`: Change the `rg` command options for file searching.
-- `:CpyBufToggleGitignore`: Toggle the inclusion of hidden files in the search results.
-- `:CpyBufChangeLabelFormat`: Change the format of the buffer labels at the top of each buffer.
+For detailed information about advanced features and customization options, check out our [Advanced Usage Guide](./ADVANCED.md).
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Feel free to open an issue or submit a pull request on GitHub.
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+## 📄 License
+
+MIT License - see the [LICENSE](LICENSE) file for details
+
+---
+
+<div align="center">
+Made with ❤️ by adia-dev
+</div>
