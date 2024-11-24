@@ -2,7 +2,7 @@
 
 > 🔍 A powerful Neovim plugin for copying and managing file contents with an intuitive Telescope interface.
 
-[INSERT DEMO GIF/IMAGE HERE]
+https://github.com/user-attachments/assets/61c263d3-251f-47ac-bd02-ff709630d463
 
 ## ✨ Features
 
@@ -15,7 +15,8 @@
 
 ## 🖼️ Screenshots
 
-[INSERT SCREENSHOTS HERE]
+<img width="1636" alt="image" src="https://github.com/user-attachments/assets/24f23dd4-b631-4894-a689-334ac5812d5a">
+<img width="1324" alt="image" src="https://github.com/user-attachments/assets/a7e25eb3-271b-4670-8db9-2128ae35d98b">
 
 ## 📥 Installation
 
