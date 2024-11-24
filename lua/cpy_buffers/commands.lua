@@ -1,11 +1,17 @@
 local config = require("cpy_buffers.config")
+local logger = require("cpy_buffers.logger")
 
 local M = {}
 
 function M.change_rg_command()
 	local current_rg_options = config.get_state().rg_options
 	local new_command = vim.fn.input("Enter new rg command options: ", current_rg_options)
-	config.update_rg_options(new_command)
+	if new_command ~= "" then
+		config.update_rg_options(new_command)
+		logger.info("Updated rg options to: " .. new_command)
+	else
+		logger.warn("No rg options entered. Keeping current options.")
+	end
 end
 
 function M.change_label_format()

@@ -3,9 +3,13 @@ local finders = require("telescope.finders")
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 local config = require("cpy_buffers.config")
-
-local devicons = require("nvim-web-devicons")
 local entry_display = require("telescope.pickers.entry_display")
+local logger = require("cpy_buffers.logger")
+
+local status_ok, devicons = pcall(require, "nvim-web-devicons")
+if not status_ok then
+	devicons = nil
+end
 
 local M = {}
 
@@ -42,7 +46,7 @@ function M.get_entry_maker()
 		local icon = ""
 		local icon_highlight = ""
 
-		if cfg.display.show_icons then
+		if devicons and cfg.display.show_icons then
 			icon, icon_highlight = devicons.get_icon(filename, ext, { default = true })
 		end
 
@@ -92,6 +96,7 @@ function M.handle_file_preview(entry)
 
 	local stats = get_file_stats(entry.value)
 	if not stats then
+		logger.error("Failed to get file stats for preview: " .. entry.value)
 		return
 	end
 
@@ -114,7 +119,9 @@ end
 local function read_file(path)
 	local fd = uv.fs_open(path, "r", 438)
 	if not fd then
-		return nil, "Error opening file: " .. path
+		local err_msg = "Error opening file: " .. path
+		logger.error(err_msg)
+		return nil, err_msg
 	end
 	local stat = uv.fs_fstat(fd)
 	local data = uv.fs_read(fd, stat.size, 0)
@@ -133,7 +140,7 @@ function M.copy_contents_of_selected_files()
 			table.insert(paths, path)
 			local data, err = read_file(path)
 			if err then
-				vim.api.nvim_err_writeln(err)
+				logger.error(err)
 			else
 				if cfg.display.label_buffers then
 					local label = M.format_label(cfg.display.label_format, path)
@@ -147,7 +154,7 @@ function M.copy_contents_of_selected_files()
 	end
 
 	if vim.tbl_isempty(contents) then
-		vim.notify("No files were copied", vim.log.levels.WARN)
+		logger.warn("No files were copied")
 		return
 	end
 
@@ -190,7 +197,7 @@ function M.copy_contents_of_selected_files()
 	table.insert(message_lines, "Total size: " .. size_str)
 
 	local message = table.concat(message_lines, "\n")
-	vim.api.nvim_echo({ { message, "Normal" } }, true, {})
+	logger.info(message)
 
 	M.selected_entries = {}
 end
@@ -233,7 +240,7 @@ function M.copy_all_files(prompt_bufnr)
 	local entries = current_picker.finder.results
 
 	if not entries or vim.tbl_isempty(entries) then
-		vim.api.nvim_echo({ { "No files to copy", "WarningMsg" } }, true, {})
+		logger.warn("No files to copy")
 		return
 	end
 
@@ -253,7 +260,7 @@ function M.toggle_all_files(prompt_bufnr)
 	local current_picker = action_state.get_current_picker(prompt_bufnr)
 	local entries = current_picker.finder.results
 	if not entries or vim.tbl_isempty(entries) then
-		vim.api.nvim_echo({ { "No files to select", "WarningMsg" } }, true, {})
+		logger.warn("No files to select")
 		return
 	end
 
@@ -462,9 +469,9 @@ function M.attach_mappings(prompt_bufnr, map)
 				current_picker:refresh(finders.new_oneshot_job(rg_command))
 
 				if config.get_state().hide_hidden_files then
-					vim.api.nvim_echo({ { "Hiding hidden files", "Normal" } }, true, {})
+					logger.info("Hiding hidden files")
 				else
-					vim.api.nvim_echo({ { "Showing hidden files", "Normal" } }, true, {})
+					logger.info("Showind hidden files")
 				end
 			end,
 		},
@@ -490,7 +497,7 @@ function M.copy_contents_to_new_buffer()
 			table.insert(paths, path)
 			local data, err = read_file(path)
 			if err then
-				vim.api.nvim_err_writeln(err)
+				logger.error(err)
 			else
 				if cfg.display.label_buffers then
 					local label = M.format_label(cfg.display.label_format, path)
@@ -504,7 +511,7 @@ function M.copy_contents_to_new_buffer()
 	end
 
 	if vim.tbl_isempty(contents) then
-		vim.api.nvim_echo({ { "No files were copied", "WarningMsg" } }, true, {})
+		logger.warn("No files were copied")
 		return
 	end
 
@@ -515,7 +522,7 @@ function M.copy_contents_to_new_buffer()
 		local choice = vim.fn.confirm("Buffer has unsaved changes. Discard changes and continue?", "&Yes\n&No", 2)
 		if choice ~= 1 then
 			-- User chose not to discard changes
-			vim.api.nvim_echo({ { "Operation cancelled.", "WarningMsg" } }, true, {})
+			logger.warn("Operation cancelled")
 			return
 		end
 	end
@@ -527,7 +534,7 @@ function M.copy_contents_to_new_buffer()
 	for _, path in ipairs(paths) do
 		table.insert(message_lines, "  - " .. path)
 	end
-	vim.api.nvim_echo({ { table.concat(message_lines, "\n"), "Normal" } }, true, {})
+	logger.info(table.concat(message_lines, "\n"))
 
 	M.selected_entries = {}
 end
@@ -542,7 +549,7 @@ function M.save_contents_to_file()
 			table.insert(paths, path)
 			local data, err = read_file(path)
 			if err then
-				vim.api.nvim_err_writeln(err)
+				logger.error(err)
 			else
 				if cfg.display.label_buffers then
 					local label = M.format_label(cfg.display.label_format, path)
@@ -554,7 +561,7 @@ function M.save_contents_to_file()
 	end
 
 	if vim.tbl_isempty(contents) then
-		vim.api.nvim_echo({ { "No files to save", "WarningMsg" } }, true, {})
+		logger.warn("No files to save")
 		return
 	end
 
@@ -570,9 +577,9 @@ function M.save_contents_to_file()
 	if file then
 		file:write(all_contents)
 		file:close()
-		vim.api.nvim_echo({ { "Contents saved to " .. filepath, "Normal" } }, true, {})
+		logger.info("Contents saved to " .. filepath)
 	else
-		vim.api.nvim_err_writeln("Error writing to file: " .. filepath)
+		logger.error("Error writing to file: " .. filepath)
 	end
 
 	M.selected_entries = {}
@@ -587,14 +594,14 @@ function M.copy_file_paths()
 	end
 
 	if vim.tbl_isempty(paths) then
-		vim.api.nvim_echo({ { "No file paths to copy", "WarningMsg" } }, true, {})
+		logger.warn("No file paths to copy")
 		return
 	end
 
 	local path_str = table.concat(paths, "\n")
 	local cfg = config.get_config()
 	vim.fn.setreg(cfg.register, path_str)
-	vim.api.nvim_echo({ { "File paths copied.", "Normal" } }, true, {})
+	logger.info("File paths copied.")
 
 	M.selected_entries = {}
 end

@@ -1,6 +1,7 @@
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
 local actions = require("telescope.actions")
+local action_state = require("telescope.actions.state")
 local previewers = require("telescope.previewers")
 local conf = require("telescope.config").values
 local config = require("cpy_buffers.config")
@@ -44,6 +45,9 @@ function M.open_file_picker(opts)
 		sorter = conf.generic_sorter(opts)
 	end
 
+	local multi_icon = cfg.selection_indicator or "+"
+	local selection_caret = cfg.selection_caret or "> "
+
 	pickers
 		.new(opts, {
 			prompt_title = cfg.display.prompt_title .. " (Toggle Selection: " .. cfg.keymaps.toggle_selection .. ")",
@@ -71,7 +75,43 @@ function M.open_file_picker(opts)
 				end,
 			}),
 			sorter = sorter,
-			attach_mappings = utils.attach_mappings,
+			selection_caret = selection_caret,
+			multi_icon = multi_icon,
+			layout_config = cfg.layout_config,
+			attach_mappings = function(prompt_bufnr, map)
+				utils.attach_mappings(prompt_bufnr, map)
+
+				local function update_results_title()
+					local current_picker = action_state.get_current_picker(prompt_bufnr)
+					local selected_count = #current_picker:get_multi_selection()
+
+					local title = "Results (Copy All: "
+						.. cfg.keymaps.fast_copy_all
+						.. ", Toggle All: "
+						.. cfg.keymaps.toggle_all
+						.. ")"
+					if selected_count > 0 then
+						title = "Selected: " .. selected_count
+					end
+
+					current_picker.results_border:change_title(title)
+				end
+
+				-- Update the title whenever selection changes
+				actions.toggle_selection:enhance({
+					post = function()
+						update_results_title()
+					end,
+				})
+
+				actions.toggle_all:enhance({
+					post = function()
+						update_results_title()
+					end,
+				})
+
+				return true
+			end,
 		})
 		:find()
 end
