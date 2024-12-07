@@ -78,8 +78,6 @@ use {
 - `<C-t>` to toggle all
 - `<CR>` to copy selected contents
 
-[INSERT QUICK START GIF HERE]
-
 ## ⚙️ Configuration
 
 Here's a basic configuration with default values:
