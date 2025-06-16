@@ -16,11 +16,6 @@ M.defaults = {
 		copy_to_buffer = "<C-b>",
 		save_to_file = "<C-s>",
 		copy_paths = "<C-p>",
-		change_strategy = "<C-f>",
-	},
-	strategy = {
-		active = "default", -- Default strategy
-		custom_strategies = {}, -- User-defined strategies
 	},
 	highlights = {
 		multi_selection = {
@@ -67,7 +62,6 @@ M.defaults = {
 M.state = {
 	hide_hidden_files = M.defaults.file_search.hide_hidden_files,
 	rg_options = M.defaults.file_search.additional_rg_options,
-	current_strategy = "default",
 }
 
 function M.setup(user_config)
@@ -104,14 +98,6 @@ end
 
 function M.update_rg_options(new_options)
 	M.state.rg_options = new_options
-end
-
-function M.set_strategy(strategy_name)
-	M.state.current_strategy = strategy_name
-end
-
-function M.get_current_strategy()
-	return M.state.current_strategy
 end
 
 return M

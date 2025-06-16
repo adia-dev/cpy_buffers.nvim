@@ -5,7 +5,6 @@ local action_state = require("telescope.actions.state")
 local config = require("cpy_buffers.config")
 local entry_display = require("telescope.pickers.entry_display")
 local logger = require("cpy_buffers.logger")
-local strategies = require("cpy_buffers.strategies")
 
 local status_ok, devicons = pcall(require, "nvim-web-devicons")
 if not status_ok then
@@ -440,14 +439,6 @@ function M.attach_mappings(prompt_bufnr, map)
 		},
 		{
 			modes = { "i", "n" },
-			key = cfg.keymaps.change_strategy,
-			action = function()
-				M.change_strategy(prompt_bufnr)
-			end,
-			description = "[CpyBuffers] Change strategy",
-		},
-		{
-			modes = { "i", "n" },
 			key = cfg.keymaps.toggle_hidden,
 			description = "[CpyBuffers] Toggle hidden files",
 			action = function()
@@ -491,35 +482,6 @@ function M.attach_mappings(prompt_bufnr, map)
 			map(mode, mapping.key, mapping.action, { desc = mapping.description })
 		end
 	end
-
-	local function update_results_title()
-		local current_picker = action_state.get_current_picker(prompt_bufnr)
-		local selected_count = #current_picker:get_multi_selection()
-
-		local title = "Results (Copy All: "
-			.. cfg.keymaps.fast_copy_all
-			.. ", Toggle All: "
-			.. cfg.keymaps.toggle_all
-			.. ")"
-		if selected_count > 0 then
-			title = "Selected: " .. selected_count
-		end
-
-		current_picker.results_border:change_title(title)
-	end
-
-	-- Update the title whenever selection changes
-	actions.toggle_selection:enhance({
-		post = function()
-			update_results_title()
-		end,
-	})
-
-	actions.toggle_all:enhance({
-		post = function()
-			update_results_title()
-		end,
-	})
 
 	return true
 end
@@ -642,57 +604,6 @@ function M.copy_file_paths()
 	logger.info("File paths copied.")
 
 	M.selected_entries = {}
-end
-
-function M.change_strategy(prompt_bufnr)
-	local picker = require("cpy_buffers.picker")
-	local current_picker = action_state.get_current_picker(prompt_bufnr)
-	local strategy_list = strategies.list_strategies()
-
-	-- Store current window and buffer for reopening
-	local current_win = vim.api.nvim_get_current_win()
-
-	-- Create selection items
-	local items = {}
-	for _, strategy in ipairs(strategy_list) do
-		table.insert(items, string.format("%s: %s", strategy.name, strategy.description))
-	end
-
-	-- Close current picker before showing selection menu
-	actions.close(prompt_bufnr)
-
-	-- Show strategy selection menu
-	vim.ui.select(items, {
-		prompt = "Select a strategy:",
-		format_item = function(item)
-			return item
-		end,
-	}, function(choice)
-		if choice then
-			local strategy_name = choice:match("^([^:]+):")
-			config.set_strategy(strategy_name)
-
-			-- Log the strategy change
-			logger.info("Changed strategy to: " .. strategy_name)
-
-			-- Reopen picker with new strategy
-			vim.schedule(function()
-				-- Ensure we're in the original window
-				if vim.api.nvim_win_is_valid(current_win) then
-					vim.api.nvim_set_current_win(current_win)
-				end
-				picker.open_file_picker()
-			end)
-		else
-			-- If no choice was made, reopen with current strategy
-			vim.schedule(function()
-				if vim.api.nvim_win_is_valid(current_win) then
-					vim.api.nvim_set_current_win(current_win)
-				end
-				picker.open_file_picker()
-			end)
-		end
-	end)
 end
 
 return M
